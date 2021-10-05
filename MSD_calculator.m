@@ -8,8 +8,8 @@ function [MSD] = MSD_calculator(tracks,TruncLength,apply_filter)
 % appropriately for your data.
 %
 % INPUTS
-% tracks      output from Andreas, will get turned into:(columns: x (pixels), y(pixels), frame number, trajectory
-%             number)
+% tracks      input matrix needs to have (columns 2:frame number, 3: x (pixels), 4: y(pixels),  11:trajectory
+%             number). Other columns can be blank or contain data
 % TruncLength is the length you want to truncate all the tracks to. Should
 %             be at least 4*TimeInt+1 for decent statistics 
 % apply_filter 1 to apply a filter at MSD(1)=1 to get rid of free halotag before
@@ -20,10 +20,8 @@ function [MSD] = MSD_calculator(tracks,TruncLength,apply_filter)
 %             column is one step, increasing up to TruncLength-1
 %
 % EXAMPLE OF USE
-% 1. I dragged and dropped the 'compileddata' you sent into the command window
-% on Matlab. Then select 'Numeric Matrix' from OutputType dropdown menu in
-% the import wizard. Click the green tick (Import selection).
-% 2. Check (and adjust if needed) the parameters 'pixel', 'dT',
+% 1. create or import an input numeric matrix called 'compileddata' 
+% 2. Check (and adjust if needed) the parameters 'pixel', 'dT', at the end of this section
 % Ctrl+S to save your changes
 % 3. Type (or copy-paste) the following to the command line:%
 % [MSD] = MSD_calculator(compiledData,25,1);
@@ -39,7 +37,7 @@ dT = 0.35; % time per frame in seconds (1/frames per sec, should be the cycle ti
 trackstemp=tracks;
 tracks=horzcat(trackstemp(:,3:4),trackstemp(:,2),trackstemp(:,11)-min(trackstemp(:,11))+1);
 
-%determine the maximun track number
+%determine the maximum track number
 MaxTraj=max(tracks(:,4));
 %%Truncate the tracks; chop up longer tracks
 %make all tracks TruncLength frames long
