@@ -2,7 +2,7 @@ function [fitresult, rchi2,Percents,DiffCoeff,Errors]=Bootstrap(Nsample, Data, r
 % Bootstrap
 % This code runs a bootstrap (take a sample with replacement of the data
 % 100 times; do the fitting,standard deviation of the fitted parameter
-% from the samples is teh standard error on the real fitted parameter
+% from the samples is the standard error on the real fitted parameter
 %
 % INPUTS
 % Nsample     number of samples to take; 25-200 recommended by Efron and
@@ -50,7 +50,7 @@ for n=1:Nsample
 end
 
 %Now calculate the standard deviations of these resamples (do it manually
-%because need SAMPLE STD here and Matlab only has population built in :( )
+%because need SAMPLE STD here and Matlab only has population built in )
 Means=mean(Outputs,1);
 Diffs=Outputs-Means;
 Sums=sum(Diffs.^2,1);
