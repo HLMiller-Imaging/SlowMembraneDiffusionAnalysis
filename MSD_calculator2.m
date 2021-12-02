@@ -1,4 +1,4 @@
-function [MSD] = MSD_calculator(tracks,TruncLength,apply_filter)
+function [MSD] = MSD_calculator2(tracks,TruncLength,apply_filter)
 % MSD_calculator
 % Calculates MSDs
 % It also makes MSD plots for a set of 2D tracks data. You can
@@ -8,8 +8,8 @@ function [MSD] = MSD_calculator(tracks,TruncLength,apply_filter)
 % appropriately for your data.
 %
 % INPUTS
-% tracks      input matrix needs to have (columns 2:frame number, 3: x (pixels), 4: y(pixels),  11:trajectory
-%             number). Other columns can be blank or contain data
+% tracks      output from Andreas, will get turned into:(columns: x (pixels), y(pixels), frame number, trajectory
+%             number)
 % TruncLength is the length you want to truncate all the tracks to. Should
 %             be at least 4*TimeInt+1 for decent statistics 
 % apply_filter 1 to apply a filter at MSD(1)=1 to get rid of free halotag before
@@ -20,8 +20,10 @@ function [MSD] = MSD_calculator(tracks,TruncLength,apply_filter)
 %             column is one step, increasing up to TruncLength-1
 %
 % EXAMPLE OF USE
-% 1. create or import an input numeric matrix called 'compileddata' 
-% 2. Check (and adjust if needed) the parameters 'pixel', 'dT', at the end of this section
+% 1. I dragged and dropped the 'compileddata' you sent into the command window
+% on Matlab. Then select 'Numeric Matrix' from OutputType dropdown menu in
+% the import wizard. Click the green tick (Import selection).
+% 2. Check (and adjust if needed) the parameters 'pixel', 'dT',
 % Ctrl+S to save your changes
 % 3. Type (or copy-paste) the following to the command line:%
 % [MSD] = MSD_calculator(compiledData,25,1);
@@ -30,14 +32,14 @@ function [MSD] = MSD_calculator(tracks,TruncLength,apply_filter)
 
 %%PARAMETERS TO SET FOR A DATA SET
 pixel =0.117; % length per pixel in um (0.096 = 96nm)
-dT = 0.35; % time per frame in seconds (1/frames per sec, should be the cycle time, not the exposure time)
+dT = 0.08; % time per frame in seconds (1/frames per sec, should be the cycle time, not the exposure time)
 
 %%
 %quickly change the shape of the input 
 trackstemp=tracks;
 tracks=horzcat(trackstemp(:,3:4),trackstemp(:,2),trackstemp(:,11)-min(trackstemp(:,11))+1);
 
-%determine the maximum track number
+%determine the maximun track number
 MaxTraj=max(tracks(:,4));
 %%Truncate the tracks; chop up longer tracks
 %make all tracks TruncLength frames long
@@ -47,6 +49,7 @@ for uu=1:max(tracks(:,4))
    rows=find(tracks(:,4)==uu);
    minitraj2=tracks(rows,:);
    count3r=1;
+   flag=0;
    if length(rows)<TruncLength
        %it's too short, set traj no to zero
       tracks(rows,4)=0; 
@@ -63,6 +66,7 @@ for uu=1:max(tracks(:,4))
        %one
        qq=1;
        count3r=0;
+       flag=1;
        while qq<(length(rows)-TruncLength+1)
            rowsConseq=find((minitraj2(qq+1:qq+TruncLength-1,3)-minitraj2(qq:qq+TruncLength-2,3))==1);
            if length(rowsConseq)==TruncLength-1
@@ -71,6 +75,7 @@ for uu=1:max(tracks(:,4))
                     %skip to next interval
                     qq=qq+TruncLength-1;
                     count3r=count3r+1;
+                    flag=0;
                 else
                     tracks(rows(qq:qq+TruncLength-1),4)=MaxTraj+count3r+Excess;%create a new traj no for this new consec. interval
                     count3r=count3r+1;
@@ -84,7 +89,7 @@ for uu=1:max(tracks(:,4))
        %set any remaining track nos to zero
        tracks(rows(qq:end),4)=0;
    end 
-   Excess=Excess+count3r-1;
+   Excess=Excess+count3r-1+flag;
 end
 %now delete all the rows where you set the traj no to zero
 tracks(tracks(:,4)==0,:)=[];
